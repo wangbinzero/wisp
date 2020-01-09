@@ -96,7 +96,7 @@ func (this *binanceExchange) SubDepths(symbol string, size int) error {
 
 func (this *binanceExchange) SubTicker(symbol string) error {
 	if this.tickerCallback == nil {
-		return errors.New("ticker")
+		return errors.New("ticker回调函数未初始化")
 	}
 
 	endpoint := fmt.Sprintf("%s%s@bookTicker", this.combinedBaseUrl, strings.ToLower(symbol))
@@ -124,6 +124,39 @@ func (this *binanceExchange) SubTicker(symbol string) error {
 
 		default:
 			return errors.New("未知消息类型")
+		}
+		return nil
+	}
+	this.subscribe(endpoint, handle)
+	return nil
+}
+
+func (this *binanceExchange) SubKline(symbol string, period int) error {
+	if this.klineCallback == nil {
+		return errors.New("kline回调函数未初始化")
+	}
+	res, ok := KLINE_PERIOD[period]
+	if !ok {
+		res = "1m"
+	}
+	endpoint := fmt.Sprintf("%s%s@kline_%s", this.combinedBaseUrl, strings.ToLower(symbol), res)
+	handle := func(msg []byte) error {
+		log.Info("k线:", string(msg))
+		dataMap := make(map[string]interface{})
+		err := json.Unmarshal(msg, &dataMap)
+		if err != nil {
+			return err
+		}
+
+		data := dataMap["data"].(map[string]interface{})
+		msgType, ok := data["e"].(string)
+		if !ok {
+			return errors.New("k线类型错误")
+		}
+		switch msgType {
+		case "kline":
+		default:
+			return nil
 		}
 		return nil
 	}
