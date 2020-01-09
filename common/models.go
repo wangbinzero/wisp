@@ -26,3 +26,13 @@ type Ticker struct {
 	Vol    float64 `json:"vol"`
 	Date   uint64  `json:"date"`
 }
+
+type Kline struct {
+	Symbol    string
+	Timestamp int64
+	Open      float64
+	Close     float64
+	High      float64
+	Low       float64
+	Vol       float64
+}

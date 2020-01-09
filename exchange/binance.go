@@ -22,7 +22,7 @@ type binanceExchange struct {
 	baseUrl         string
 	combinedBaseUrl string //组合订阅地址
 	depthCallback   func(*Depth)
-	klineCallback   func()
+	klineCallback   func(*Kline, int)
 	tickerCallback  func(*Ticker)
 }
 
@@ -141,7 +141,6 @@ func (this *binanceExchange) SubKline(symbol string, period int) error {
 	}
 	endpoint := fmt.Sprintf("%s%s@kline_%s", this.combinedBaseUrl, strings.ToLower(symbol), res)
 	handle := func(msg []byte) error {
-		log.Info("k线:", string(msg))
 		dataMap := make(map[string]interface{})
 		err := json.Unmarshal(msg, &dataMap)
 		if err != nil {
@@ -155,8 +154,12 @@ func (this *binanceExchange) SubKline(symbol string, period int) error {
 		}
 		switch msgType {
 		case "kline":
+			k := data["k"].(map[string]interface{})
+			kline := this.parseKline(k)
+			kline.Symbol = symbol
+			this.klineCallback(kline, period)
 		default:
-			return nil
+			return errors.New("未知数据类型")
 		}
 		return nil
 	}
@@ -188,7 +191,20 @@ func (this *binanceExchange) parseTicker(tickerMap map[string]interface{}) *Tick
 	return ticker
 }
 
-func (this *binanceExchange) SetCallbacks(depthCallback func(depth *Depth), tickerCallback func(ticker *Ticker)) {
+func (this *binanceExchange) parseKline(k map[string]interface{}) *Kline {
+	kline := &Kline{
+		Timestamp: int64(ToInt(k["t"])),
+		Open:      ToFloat64(k["o"]),
+		Close:     ToFloat64(k["o"]),
+		High:      ToFloat64(k["o"]),
+		Low:       ToFloat64(k["o"]),
+		Vol:       ToFloat64(k["o"]),
+	}
+	return kline
+}
+
+func (this *binanceExchange) SetCallbacks(depthCallback func(*Depth), tickerCallback func(*Ticker), klineCallback func(*Kline, int)) {
 	this.depthCallback = depthCallback
 	this.tickerCallback = tickerCallback
+	this.klineCallback = klineCallback
 }
