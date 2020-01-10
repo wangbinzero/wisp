@@ -48,6 +48,7 @@ func (this *binanceExchange) protocolHandle(data []byte) error {
 
 func (this *binanceExchange) errorHandle(err error) {
 	log.Info("币安异常信息: %v\n", err.Error())
+	this.Reconnect()
 }
 
 func (this *binanceExchange) subscribe(endpoint string, handle func(msg []byte) error) {
@@ -99,8 +100,8 @@ func (this *binanceExchange) SubTicker(symbol string) error {
 		return errors.New("ticker回调函数未初始化")
 	}
 
-	endpoint := fmt.Sprintf("%s%s@bookTicker", this.combinedBaseUrl, strings.ToLower(symbol))
-	endpoint = this.combinedBaseUrl + "btcusdt@miniTicker"
+	endpoint := fmt.Sprintf("%s%s@miniTicker", this.combinedBaseUrl, strings.ToLower(symbol))
+	//endpoint = this.combinedBaseUrl + "btcusdt@miniTicker"
 
 	handle := func(msg []byte) error {
 		//log.Info("打印消息: %v\n", string(msg))
@@ -180,14 +181,22 @@ func (this *binanceExchange) parseDepthData(bids, asks [][]interface{}) *Depth {
 }
 
 func (this *binanceExchange) parseTicker(tickerMap map[string]interface{}) *Ticker {
-	ticker := new(Ticker)
-	ticker.Date = ToUint64(tickerMap["E"])
-	ticker.Last = ToFloat64(tickerMap["c"])
-	ticker.Vol = ToFloat64(tickerMap["v"])
-	ticker.Low = ToFloat64(tickerMap["l"])
-	ticker.High = ToFloat64(tickerMap["h"])
-	ticker.Buy = ToFloat64(tickerMap["b"])
-	ticker.Sell = ToFloat64(tickerMap["a"])
+	ticker := &Ticker{
+		Last: ToFloat64(tickerMap["c"]),
+		Buy:  ToFloat64(tickerMap["b"]),
+		Sell: ToFloat64(tickerMap["a"]),
+		High: ToFloat64(tickerMap["h"]),
+		Low:  ToFloat64(tickerMap["l"]),
+		Vol:  ToFloat64(tickerMap["v"]),
+	}
+	//ticker := new(Ticker)
+	//ticker.Date = ToUint64(tickerMap["E"])
+	//ticker.Last = ToFloat64(tickerMap["c"])
+	//ticker.Vol = ToFloat64(tickerMap["v"])
+	//ticker.Low = ToFloat64(tickerMap["l"])
+	//ticker.High = ToFloat64(tickerMap["h"])
+	//ticker.Buy = ToFloat64(tickerMap["b"])
+	//ticker.Sell = ToFloat64(tickerMap["a"])
 	return ticker
 }
 
