@@ -202,5 +202,5 @@ func Warn(format string, v ...interface{}) {
 
 //初始化日志
 func InitLog() {
-	Init("logs", "wisp", "[WISP] –– ", "info")
+	Init("logs", "wisp", "[Wisp] –– ", "info")
 }

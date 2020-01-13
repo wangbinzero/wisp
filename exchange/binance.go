@@ -74,7 +74,7 @@ func (this *binanceExchange) SubDepths(symbol string, size int) error {
 	endpoint := fmt.Sprintf("%s%s@depth%d@1000ms", this.combinedBaseUrl, strings.ToLower(symbol), size)
 	//log.Info("打印深度端点: %s\n", endpoint)
 	handle := func(msg []byte) error {
-		log.Info("打印消息: %v\n", string(msg))
+		//log.Info("打印消息: %v\n",string(msg))
 		rawDepth := struct {
 			Stream string `json:"stream"`
 			Data   struct {
