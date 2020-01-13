@@ -293,7 +293,7 @@ func (this *WebsocketConnection) connect() {
 			log.Info("代理地址设置错误: 代理地址为: [%s] 错误信息: %v\n", this.proxyUrl, err.Error())
 		} else {
 			dial.Proxy = http.ProxyURL(proxy)
-			log.Info("设置当前连接代理地址为: [%s]\n", this.proxyUrl)
+			//log.Info("设置当前连接代理地址为: [%s]\n", this.proxyUrl)
 		}
 	}
 

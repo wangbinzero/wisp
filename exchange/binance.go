@@ -56,7 +56,9 @@ func (this *binanceExchange) subscribe(endpoint string, handle func(msg []byte) 
 		SetWebsocketUrl(endpoint).
 		SetReconnectIntervalTime(12 * time.Hour).
 		SetProtocolHandle(handle).
+		OpenDump().
 		SetProxyUrl("socks5://127.0.0.1:1080").
+		//SetHeartBeat([]byte("pong"), 2*time.Second).
 		SetErrorHandle(this.errorHandle)
 	conn := builder.Build()
 	conn.RecvMsg()
@@ -70,8 +72,9 @@ func (this *binanceExchange) SubDepths(symbol string, size int) error {
 		return errors.New("深度订阅错误，超出档数: 5/10/20")
 	}
 	endpoint := fmt.Sprintf("%s%s@depth%d@1000ms", this.combinedBaseUrl, strings.ToLower(symbol), size)
-	log.Info("打印深度端点: %s\n", endpoint)
+	//log.Info("打印深度端点: %s\n", endpoint)
 	handle := func(msg []byte) error {
+		log.Info("打印消息: %v\n", string(msg))
 		rawDepth := struct {
 			Stream string `json:"stream"`
 			Data   struct {
@@ -181,22 +184,14 @@ func (this *binanceExchange) parseDepthData(bids, asks [][]interface{}) *Depth {
 }
 
 func (this *binanceExchange) parseTicker(tickerMap map[string]interface{}) *Ticker {
-	ticker := &Ticker{
-		Last: ToFloat64(tickerMap["c"]),
-		Buy:  ToFloat64(tickerMap["b"]),
-		Sell: ToFloat64(tickerMap["a"]),
-		High: ToFloat64(tickerMap["h"]),
-		Low:  ToFloat64(tickerMap["l"]),
-		Vol:  ToFloat64(tickerMap["v"]),
-	}
-	//ticker := new(Ticker)
-	//ticker.Date = ToUint64(tickerMap["E"])
-	//ticker.Last = ToFloat64(tickerMap["c"])
-	//ticker.Vol = ToFloat64(tickerMap["v"])
-	//ticker.Low = ToFloat64(tickerMap["l"])
-	//ticker.High = ToFloat64(tickerMap["h"])
-	//ticker.Buy = ToFloat64(tickerMap["b"])
-	//ticker.Sell = ToFloat64(tickerMap["a"])
+	ticker := new(Ticker)
+	ticker.Date = ToUint64(tickerMap["E"])
+	ticker.Last = ToFloat64(tickerMap["c"])
+	ticker.Vol = ToFloat64(tickerMap["v"])
+	ticker.Low = ToFloat64(tickerMap["l"])
+	ticker.High = ToFloat64(tickerMap["h"])
+	ticker.Buy = ToFloat64(tickerMap["b"])
+	ticker.Sell = ToFloat64(tickerMap["a"])
 	return ticker
 }
 
@@ -204,10 +199,10 @@ func (this *binanceExchange) parseKline(k map[string]interface{}) *Kline {
 	kline := &Kline{
 		Timestamp: int64(ToInt(k["t"])),
 		Open:      ToFloat64(k["o"]),
-		Close:     ToFloat64(k["o"]),
-		High:      ToFloat64(k["o"]),
-		Low:       ToFloat64(k["o"]),
-		Vol:       ToFloat64(k["o"]),
+		Close:     ToFloat64(k["c"]),
+		High:      ToFloat64(k["h"]),
+		Low:       ToFloat64(k["l"]),
+		Vol:       ToFloat64(k["v"]),
 	}
 	return kline
 }

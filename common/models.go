@@ -28,11 +28,11 @@ type Ticker struct {
 }
 
 type Kline struct {
-	Symbol    string
-	Timestamp int64
-	Open      float64
-	Close     float64
-	High      float64
-	Low       float64
-	Vol       float64
+	Symbol    string  `json:"s"`
+	Timestamp int64   `json:"t"`
+	Open      float64 `json:"o"`
+	Close     float64 `json:"c"`
+	High      float64 `json:"h"`
+	Low       float64 `json:"l"`
+	Vol       float64 `json:"v"`
 }

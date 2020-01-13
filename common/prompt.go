@@ -1,5 +1,7 @@
 package common
 
+import "github.com/gorilla/websocket"
+
 var Logo = `
 ----------------------------
  _      ___        
@@ -46,3 +48,5 @@ var KLINE_PERIOD = map[int]string{
 	KLINE_PERIOD_1W:    "1w",
 	KLINE_PERIOD_1M:    "1M",
 }
+
+var ChanMap = map[string]*websocket.Conn{}
